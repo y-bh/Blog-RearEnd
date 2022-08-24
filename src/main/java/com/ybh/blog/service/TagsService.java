@@ -1,6 +1,6 @@
 package com.ybh.blog.service;
 
-import com.ybh.blog.entity.Tags;
+import com.ybh.blog.DO.TagsDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Altria
  * @since 2022-08-23
  */
-public interface TagsService extends IService<Tags> {
+public interface TagsService extends IService<TagsDO> {
 
 }

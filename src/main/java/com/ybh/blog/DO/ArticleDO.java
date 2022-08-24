@@ -1,4 +1,4 @@
-package com.ybh.blog.entity;
+package com.ybh.blog.DO;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -11,52 +11,52 @@ import lombok.Setter;
 
 /**
  * <p>
- * æ–‡ç« è¡¨
+ * 文章表
  * </p>
  *
  * @author Altria
- * @since 2022-08-24
+ * @since 2022-08-23
  */
 @Getter
 @Setter
 @TableName("blog_article")
-@ApiModel(value = "Article对象", description = "æ–‡ç« è¡¨")
-public class Article implements Serializable {
+@ApiModel(value = "Article对象", description = "文章表")
+public class ArticleDO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("id")
     private Long id;
 
-    @ApiModelProperty("æ ‡é¢˜")
+    @ApiModelProperty("标题")
     private String title;
 
-    @ApiModelProperty("åˆ†ç±»id")
+    @ApiModelProperty("分类")
     private String categoryId;
 
-    @ApiModelProperty("æ ‡ç­¾id")
+    @ApiModelProperty("标签")
     private Long tagsId;
 
-    @ApiModelProperty("æ–‡ç« å†…å®¹")
+    @ApiModelProperty("文章内容")
     private Long body;
 
-    @ApiModelProperty("è´¦å·")
+    @ApiModelProperty("用户账号")
     private String accountId;
 
-    @ApiModelProperty("åˆ›å»ºæ—¶é—´")
+    @ApiModelProperty("创建时间")
     private LocalDateTime gmtCreated;
 
-    @ApiModelProperty("ä¿®æ”¹æ—¶é—´")
+    @ApiModelProperty("修改时间")
     private LocalDateTime gmtModified;
 
-    @ApiModelProperty("æ˜¯å¦åˆ é™¤")
+    @ApiModelProperty("是否删除")
     @TableLogic
     private String isDeleted;
 
-    @ApiModelProperty("åˆ›å»ºäºº")
+    @ApiModelProperty("创建人")
     private String creater;
 
-    @ApiModelProperty("ä¿®æ”¹äºº")
+    @ApiModelProperty("修改人")
     private String modifier;
 
 

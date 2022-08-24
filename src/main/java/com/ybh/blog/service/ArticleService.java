@@ -1,6 +1,6 @@
 package com.ybh.blog.service;
 
-import com.ybh.blog.entity.Article;
+import com.ybh.blog.DO.ArticleDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Altria
  * @since 2022-08-23
  */
-public interface ArticleService extends IService<Article> {
+public interface ArticleService extends IService<ArticleDO> {
 
 }

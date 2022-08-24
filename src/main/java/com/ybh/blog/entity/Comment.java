@@ -13,16 +13,16 @@ import lombok.Setter;
 
 /**
  * <p>
- * 
+ * è¯„è®ºè¡¨
  * </p>
  *
  * @author Altria
- * @since 2022-08-23
+ * @since 2022-08-24
  */
 @Getter
 @Setter
 @TableName("blog_comment")
-@ApiModel(value = "Comment对象", description = "")
+@ApiModel(value = "Comment对象", description = "è¯„è®ºè¡¨")
 public class Comment implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,23 +31,23 @@ public class Comment implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @ApiModelProperty("父评论id")
+    @ApiModelProperty("çˆ¶è¯„è®ºid")
     private String parentcommentId;
 
-    @ApiModelProperty("评论内容")
+    @ApiModelProperty("å­è¯„è®ºid")
     private String subComment;
 
-    @ApiModelProperty("是否删除")
+    @ApiModelProperty("æ˜¯å¦åˆ é™¤")
     @TableLogic
     private String isDeleted;
 
-    @ApiModelProperty("创建人")
+    @ApiModelProperty("åˆ›å»ºäºº")
     private String creater;
 
-    @ApiModelProperty("修改人")
+    @ApiModelProperty("ä¿®æ”¹äºº")
     private String modifier;
 
-    @ApiModelProperty("创建时间")
+    @ApiModelProperty("åˆ›å»ºæ—¶é—´")
     private LocalDateTime gmtCreated;
 
 

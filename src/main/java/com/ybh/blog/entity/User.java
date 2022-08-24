@@ -13,16 +13,16 @@ import lombok.Setter;
 
 /**
  * <p>
- * 
+ * ç”¨æˆ·ä¿¡æ¯è¡¨
  * </p>
  *
  * @author Altria
- * @since 2022-08-23
+ * @since 2022-08-24
  */
 @Getter
 @Setter
 @TableName("blog_user")
-@ApiModel(value = "User对象", description = "")
+@ApiModel(value = "User对象", description = "ç”¨æˆ·ä¿¡æ¯è¡¨")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,38 +31,38 @@ public class User implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty("姓名")
+    @ApiModelProperty("å§“å")
     private String name;
 
-    @ApiModelProperty("性别")
+    @ApiModelProperty("æ€§åˆ«")
     private String sex;
 
-    @ApiModelProperty("头像")
+    @ApiModelProperty("å¤´åƒ")
     private String avator;
 
-    @ApiModelProperty("简介")
+    @ApiModelProperty("æè¿°")
     private String description;
 
-    @ApiModelProperty("是否删除")
+    @ApiModelProperty("æ˜¯å¦åˆ é™¤")
     @TableLogic
     private String isDeleted;
 
-    @ApiModelProperty("创建时间")
+    @ApiModelProperty("åˆ›å»ºæ—¶é—´")
     private LocalDateTime gmtCreated;
 
-    @ApiModelProperty("修改时间")
+    @ApiModelProperty("ä¿®æ”¹æ—¶é—´")
     private LocalDateTime gmtModified;
 
-    @ApiModelProperty("创建人")
+    @ApiModelProperty("åˆ›å»ºäºº")
     private String creater;
 
-    @ApiModelProperty("修改人")
+    @ApiModelProperty("ä¿®æ”¹äºº")
     private String modifier;
 
-    @ApiModelProperty("手机号")
-    private Integer phone;
+    @ApiModelProperty("æ‰‹æœºå·")
+    private String phone;
 
-    @ApiModelProperty("账号")
+    @ApiModelProperty("è´¦å·")
     private String accountId;
 
 

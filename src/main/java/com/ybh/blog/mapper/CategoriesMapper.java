@@ -1,6 +1,6 @@
 package com.ybh.blog.mapper;
 
-import com.ybh.blog.entity.Categories;
+import com.ybh.blog.DO.CategoriesDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,6 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2022-08-23
  */
 @Mapper
-public interface CategoriesMapper extends BaseMapper<Categories> {
+public interface CategoriesMapper extends BaseMapper<CategoriesDO> {
 
 }

@@ -1,6 +1,6 @@
 package com.ybh.blog.service;
 
-import com.ybh.blog.entity.Comment;
+import com.ybh.blog.DO.CommentDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Altria
  * @since 2022-08-23
  */
-public interface CommentService extends IService<Comment> {
+public interface CommentService extends IService<CommentDO> {
 
 }

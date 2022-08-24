@@ -1,6 +1,6 @@
 package com.ybh.blog.service.impl;
 
-import com.ybh.blog.entity.Categories;
+import com.ybh.blog.DO.CategoriesDO;
 import com.ybh.blog.mapper.CategoriesMapper;
 import com.ybh.blog.service.CategoriesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +15,6 @@ import org.springframework.stereotype.Service;
  * @since 2022-08-23
  */
 @Service
-public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categories> implements CategoriesService {
+public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, CategoriesDO> implements CategoriesService {
 
 }
