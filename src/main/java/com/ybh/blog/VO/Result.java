@@ -70,7 +70,7 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> error(T data) {
         Result<T> result = new Result<>();
         result.setStatus(Status.ERROR);
-        result.setCode(PlatformCodeEnum.SYSTEM_ERROR.getCode());
+        result.setCode(PlatformCodeEnum.ERROR.getCode());
         result.setData(data);
         return result;
     }

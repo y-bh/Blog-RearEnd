@@ -65,5 +65,8 @@ public class UserDO implements Serializable {
     @ApiModelProperty("账号")
     private String accountId;
 
+    @ApiModelProperty("密码")
+    private String password;
+
 
 }

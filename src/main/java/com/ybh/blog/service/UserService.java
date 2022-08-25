@@ -19,4 +19,17 @@ public interface UserService extends IService<UserDO> {
      **/
     public UserDTO getUserInfo(UserDTO userDTO);
 
+    /**
+     * @return
+     * @description: 保存用户信息
+     * @author: Altria-LS
+     */
+    public Boolean saveUserInfo(UserDTO userDTO);
+
+    /**
+     * @description: 验证用户信息
+     * @author: Altria-LS
+     **/
+    public UserDTO verifyUserInfo(String accountId,String password);
+
 }

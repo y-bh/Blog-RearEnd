@@ -1,7 +1,9 @@
 package com.ybh.blog.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ybh.blog.DTO.UserDTO;
+import com.ybh.blog.Enum.PlatformCodeEnum;
 import com.ybh.blog.VO.JwtUserVO;
 import com.ybh.blog.VO.Result;
 import com.ybh.blog.service.UserService;
@@ -11,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -34,16 +37,43 @@ public class UserController {
     UserService userService;
 
     /**
-     * @description: 登录获取token
+     * @description: 注册用户
      * @author: Altria-LS
      **/
-    @RequestMapping("/login")
-    public String login(@RequestBody JwtUserVO jwtUserVO){
+    @RequestMapping("/register")
+    public Result<String> register(@RequestBody JwtUserVO jwtUserVO){
         //1.根据用户信息生成token
         String token = jwtUtil.generalToken(jwtUserVO);
         //2.将token存入redis中
         redisUtil.setValue(token,jwtUserVO,1L);
-        return token;
+        //3.保存用户信息
+        UserDTO userDTO = new UserDTO();
+        BeanUtil.copyProperties(jwtUserVO,userDTO);
+        Boolean flag = userService.saveUserInfo(userDTO);
+        if (flag==true){
+            return Result.ok(token);
+        }else{
+            return Result.error(PlatformCodeEnum.ERROR.getValue());
+        }
+    }
+
+    /**
+     * @description: 登录用户
+     * @author: Altria-LS
+     **/
+    @RequestMapping("/login")
+    public Result login(@RequestParam String accountId,@RequestParam String password){
+        UserDTO userDTO = userService.verifyUserInfo(accountId, password);
+        if (userDTO==null){
+            return Result.error(PlatformCodeEnum.ERROR);
+        }else{
+            JwtUserVO jwtUserVO = new JwtUserVO();
+            BeanUtil.copyProperties(userDTO,jwtUserVO);
+            String token = jwtUtil.generalToken(jwtUserVO);
+            redisUtil.setValue(token,jwtUserVO,1L);
+            return Result.ok(token);
+        }
+
     }
 
     /**
