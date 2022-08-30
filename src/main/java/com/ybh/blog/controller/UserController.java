@@ -37,46 +37,6 @@ public class UserController {
     UserService userService;
 
     /**
-     * @description: 注册用户
-     * @author: Altria-LS
-     **/
-    @RequestMapping("/register")
-    public Result<String> register(@RequestBody JwtUserVO jwtUserVO){
-        //1.根据用户信息生成token
-        String token = jwtUtil.generalToken(jwtUserVO);
-        //2.将token存入redis中
-        redisUtil.setValue(token,jwtUserVO,1L);
-        //3.保存用户信息
-        UserDTO userDTO = new UserDTO();
-        BeanUtil.copyProperties(jwtUserVO,userDTO);
-        Boolean flag = userService.saveUserInfo(userDTO);
-        if (flag==true){
-            return Result.ok(token);
-        }else{
-            return Result.error(PlatformCodeEnum.ERROR.getValue());
-        }
-    }
-
-    /**
-     * @description: 登录用户
-     * @author: Altria-LS
-     **/
-    @RequestMapping("/login")
-    public Result login(@RequestParam String accountId,@RequestParam String password){
-        UserDTO userDTO = userService.verifyUserInfo(accountId, password);
-        if (userDTO==null){
-            return Result.error(PlatformCodeEnum.ERROR);
-        }else{
-            JwtUserVO jwtUserVO = new JwtUserVO();
-            BeanUtil.copyProperties(userDTO,jwtUserVO);
-            String token = jwtUtil.generalToken(jwtUserVO);
-            redisUtil.setValue(token,jwtUserVO,1L);
-            return Result.ok(token);
-        }
-
-    }
-
-    /**
      * @description: 查询用户信息
      * @author: Altria-LS
      **/
@@ -89,7 +49,7 @@ public class UserController {
         if (userInfo!=null){
             return Result.ok(userInfo);
         }else{
-            return Result.error(null);
+            return Result.error("未查询到用户信息");
         }
     }
 

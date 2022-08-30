@@ -11,9 +11,6 @@ import java.util.Date;
 
 @Data
 public class JwtUserVO {
-    @ApiModelProperty("id")
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     @ApiModelProperty("姓名")
     private String name;

@@ -36,6 +36,14 @@ public class RedisUtil {
     }
 
     /**
+     * @Description: 将值带入缓存，设置存活时间
+     * @Author: za-yubohan
+     **/
+    public void set(String key, String obj, long liveSeconds) {
+        redisTemplate.opsForValue().set(key, obj, liveSeconds, TimeUnit.SECONDS);
+    }
+
+    /**
      * @description: 获取对应key的value
      * @author: Altria-LS
      **/

@@ -2,6 +2,7 @@ package com.ybh.blog.utils;
 
 import cn.hutool.core.util.StrUtil;
 import com.ybh.blog.VO.JwtUserVO;
+import com.ybh.blog.contants.TokenContants;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -36,19 +37,30 @@ public class JwtUtil {
      * @description: 生成token
      * @author: Altria-LS
      **/
-    public String generalToken(JwtUserVO jwtUserVO) {
+    public String generalToken(JwtUserVO jwtUserVO) throws Exception {
+        if (jwtUserVO==null){
+            throw new Exception("获取JwtUserVO对象失败");
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(jwtUserVO.getGmtCreated());
         calendar.add(Calendar.DATE, 1);
-        String token = Jwts.builder()
-                .setId(String.valueOf(jwtUserVO.getId()))
+        //生成新token和获取老token，如果老token存在，重新赋值，还原登录状态
+        String token=null;
+        String newToken = Jwts.builder()
+                .setId(String.valueOf(jwtUserVO.getAccountId()))
                 .setIssuedAt(jwtUserVO.getGmtCreated())
                 .signWith(key)
                 .claim("accountId",jwtUserVO.getAccountId())
                 .claim("creater", jwtUserVO.getCreater())
                 .setExpiration(calendar.getTime())
                 .compact();
-        redisUtil.setValue(token,jwtUserVO,1L);
+        String oldToken=redisUtil.get(TokenContants.JWT_ID+jwtUserVO.getAccountId());
+        if (StrUtil.isNotBlank(oldToken)){
+            token=oldToken;
+        }else {
+            token=newToken;
+        }
+        redisUtil.setValue(TokenContants.JWT_ID+jwtUserVO.getAccountId(),token,1L);
         return token;
     }
 
