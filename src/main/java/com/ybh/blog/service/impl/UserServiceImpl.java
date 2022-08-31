@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ybh.blog.DO.UserDO;
 import com.ybh.blog.DTO.UserDTO;
+import com.ybh.blog.VO.Result;
 import com.ybh.blog.mapper.UserMapper;
 import com.ybh.blog.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,22 +27,21 @@ import javax.annotation.Resource;
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
     @Resource
     UserMapper userMapper;
-    @Resource
-    RedisUtil redisUtil;
 
     @Override
     public UserDTO getUserInfo(UserDTO userDTO) {
-        UserDTO data = new UserDTO();
-        UserDO userDO = userMapper.selectById(1001);
+        QueryWrapper<UserDO> userDTOQueryWrapper = new QueryWrapper<>();
+        UserDO userDO = userMapper.selectOne(userDTOQueryWrapper.eq("account_id",userDTO.getAccountId()));
         if (userDO==null){
             return null;
         }
-        BeanUtils.copyProperties(userDO,data);
-        return data;
+        BeanUtils.copyProperties(userDO,userDTO);
+        return userDTO;
+
     }
 
     @Override
-    public Boolean saveUserInfo(UserDTO userDTO) {
+    public Boolean saveUserInfo(UserDTO userDTO) throws Exception {
         UserDO userDO = new UserDO();
         BeanUtil.copyProperties(userDTO,userDO);
         int i = userMapper.insert(userDO);

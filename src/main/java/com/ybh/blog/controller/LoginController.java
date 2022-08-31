@@ -41,23 +41,27 @@ public class LoginController {
     @RequestMapping("/register")
     public Result<String> register(@RequestBody JwtUserVO jwtUserVO) {
         String token = null;
-        try {
-            //1.根据用户信息生成token
-            token = jwtUtil.generalToken(jwtUserVO);
-        } catch (Exception e) {
-            return Result.error(e.getMessage());
-        }
-        //2.将token存入redis中
-        redisUtil.setValue(TokenContants.JWT_ID+jwtUserVO.getAccountId(),token,1L);
-        //3.保存用户信息
+        //1.保存用户信息
         UserDTO userDTO = new UserDTO();
         BeanUtil.copyProperties(jwtUserVO, userDTO);
-        Boolean flag = userService.saveUserInfo(userDTO);
+        Boolean flag = null;
+        try {
+            flag = userService.saveUserInfo(userDTO);
+        } catch (Exception e) {
+            return Result.error("账号已存在");
+        }
         if (flag) {
-            System.out.println(token);
-            return Result.ok(token);
+            try {
+                //2.根据用户信息生成token
+                token = jwtUtil.generalToken(jwtUserVO);
+            } catch (Exception e) {
+                return Result.error("寄，redis连不上");
+            }
+            //3.将token存入redis中
+            redisUtil.setValue(TokenContants.JWT_ID + jwtUserVO.getAccountId(), token, 1L);
+            return Result.ok("注册成功", token);
         } else {
-            return Result.error("注册失败");
+            return Result.error("寄，注册失败");
         }
     }
 
@@ -77,13 +81,13 @@ public class LoginController {
         String freezeKey = TokenContants.JWT_FREEZE_COUT + accountId;
         //校验用户是否需要冻结，如果需要冻结，则冻结用户登录5分钟
         Result<?> result = validateAndFreezeUser(freezeKey, accountId);
-        if (result!=null){
+        if (result != null) {
             return result;
         }
         UserDTO userDTO = userService.verifyUserInfo(accountId, password);
         if (userDTO == null) {
             //错误次数记录+1
-            restPwdErrorCount(picErrorKey,freezeKey);
+            restPwdErrorCount(picErrorKey, freezeKey);
             return Result.error("账号或密码不正确");
         } else {
             JwtUserVO jwtUserVO = new JwtUserVO();
@@ -98,8 +102,8 @@ public class LoginController {
             redisUtil.delete(freezeKey);
             redisUtil.delete(picErrorKey);
             //保存token到redis
-            redisUtil.set(TokenContants.JWT_ID+accountId,token);
-            redisUtil.setValue(TokenContants.JWT_LOGIN_USER_INFO+accountId,jwtUserVO,1L);
+            redisUtil.set(TokenContants.JWT_ID + accountId, token);
+            redisUtil.setValue(TokenContants.JWT_LOGIN_USER_INFO + accountId, jwtUserVO, 1L);
 
             return Result.ok(token);
         }
@@ -113,7 +117,7 @@ public class LoginController {
     public Result<?> loginOut(HttpServletRequest httpRequest) {
         String token = httpRequest.getHeader(TokenContants.JWT_TOKEN_KEY);
         JwtUserVO userVO = jwtUtil.parseToken();
-        redisUtil.delete(TokenContants.JWT_ID+userVO.getAccountId());
+        redisUtil.delete(TokenContants.JWT_ID + userVO.getAccountId());
         return Result.ok();
     }
 
@@ -159,7 +163,7 @@ public class LoginController {
     }
 
     /**
-     * @Description: 从redis中获取密码校验失败次数,判断是否需要冻结用户
+     * @Description: 从redis中获取密码校验失败次数, 判断是否需要冻结用户
      * @Author: za-yubohan
      **/
     private boolean isNeedFreeze(String key) {

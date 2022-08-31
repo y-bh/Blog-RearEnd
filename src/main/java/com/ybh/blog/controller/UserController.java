@@ -41,7 +41,7 @@ public class UserController {
      * @author: Altria-LS
      **/
     @RequestMapping("/getUserInfo")
-    public Result<UserDTO> getUserInfo(){
+    public Result<UserDTO> getUserInfo() throws Exception {
         JwtUserVO jwtUserVO = jwtUtil.parseToken();
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(jwtUserVO, userDTO);

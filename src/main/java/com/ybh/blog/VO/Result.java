@@ -41,11 +41,6 @@ public class Result<T> implements Serializable {
      */
     private T data;
 
-    /**
-     * 时间戳
-     */
-    private Long date = new Date().getTime();
-
     private boolean success;
 
     public Result<T> Message(String message) {
