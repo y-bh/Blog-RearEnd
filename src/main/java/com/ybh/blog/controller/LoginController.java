@@ -1,8 +1,7 @@
 package com.ybh.blog.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import com.ybh.blog.DTO.UserDTO;
+import com.ybh.blog.Enum.PlatformCodeEnum;
 import com.ybh.blog.VO.JwtUserVO;
 import com.ybh.blog.VO.Result;
 import com.ybh.blog.contants.TokenContants;
@@ -10,13 +9,9 @@ import com.ybh.blog.service.UserService;
 import com.ybh.blog.utils.JwtUtil;
 import com.ybh.blog.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Author:za-yubohan
@@ -38,24 +33,20 @@ public class LoginController {
      * @description: 注册用户
      * @author: Altria-LS
      **/
-    @RequestMapping("/register")
+    @PostMapping("/register")
     public Result<String> register(@RequestBody JwtUserVO jwtUserVO) {
         String token = null;
-        //1.保存用户信息
-        UserDTO userDTO = new UserDTO();
-        BeanUtil.copyProperties(jwtUserVO, userDTO);
-        Boolean flag = null;
-        try {
-            flag = userService.saveUserInfo(userDTO);
-        } catch (Exception e) {
+        JwtUserVO userInfo = userService.getUserInfo(jwtUserVO);
+        if (userInfo!=null){
             return Result.error("账号已存在");
         }
+        Boolean flag = userService.saveUserInfo(jwtUserVO);
         if (flag) {
             try {
                 //2.根据用户信息生成token
                 token = jwtUtil.generalToken(jwtUserVO);
             } catch (Exception e) {
-                return Result.error("寄，redis连不上");
+                return Result.error(e.getMessage());
             }
             //3.将token存入redis中
             redisUtil.setValue(TokenContants.JWT_ID + jwtUserVO.getAccountId(), token, 1L);
@@ -69,32 +60,30 @@ public class LoginController {
      * @description: 登录用户
      * @author: Altria-LS
      **/
-    @RequestMapping("/login")
-    public Result<?> login(@RequestParam String accountId, @RequestParam String password) {
+    @PostMapping("/login")
+    public Result<?> login(@RequestBody JwtUserVO jwtUserVO) {
         // 判断输错次数是否到达需要验证码的次数
-        String picErrorKey = TokenContants.LOGIN_PWD_ERROR_KEY + accountId;
+        String picErrorKey = TokenContants.LOGIN_PWD_ERROR_KEY + jwtUserVO.getAccountId();
         if (pwdPicIsNeed(picErrorKey)) {
             log.warn("用户登录失败，安全验证！");
             return Result.error(TokenContants.LOGIN_CAPTCHA_IS_NULL, "安全验证");
         }
         //判断是否冻结用户，超过5次冻结用户
-        String freezeKey = TokenContants.JWT_FREEZE_COUT + accountId;
+        String freezeKey = TokenContants.JWT_FREEZE_COUT + jwtUserVO.getAccountId();
         //校验用户是否需要冻结，如果需要冻结，则冻结用户登录5分钟
-        Result<?> result = validateAndFreezeUser(freezeKey, accountId);
+        Result<?> result = validateAndFreezeUser(freezeKey, jwtUserVO.getAccountId());
         if (result != null) {
             return result;
         }
-        UserDTO userDTO = userService.verifyUserInfo(accountId, password);
-        if (userDTO == null) {
+        JwtUserVO userVO = userService.verifyUserInfo(jwtUserVO.getAccountId(), jwtUserVO.getPassword());
+        if (StrUtil.isEmpty(userVO.getAccountId())) {
             //错误次数记录+1
             restPwdErrorCount(picErrorKey, freezeKey);
             return Result.error("账号或密码不正确");
         } else {
-            JwtUserVO jwtUserVO = new JwtUserVO();
-            BeanUtil.copyProperties(userDTO, jwtUserVO);
             String token = null;
             try {
-                token = jwtUtil.generalToken(jwtUserVO);
+                token = jwtUtil.generalToken(userVO);
             } catch (Exception e) {
                 return Result.error(e.getMessage());
             }
@@ -102,8 +91,8 @@ public class LoginController {
             redisUtil.delete(freezeKey);
             redisUtil.delete(picErrorKey);
             //保存token到redis
-            redisUtil.set(TokenContants.JWT_ID + accountId, token);
-            redisUtil.setValue(TokenContants.JWT_LOGIN_USER_INFO + accountId, jwtUserVO, 1L);
+            redisUtil.set(TokenContants.JWT_ID + jwtUserVO.getAccountId(), token);
+            redisUtil.setValue(TokenContants.JWT_LOGIN_USER_INFO + jwtUserVO.getAccountId(), userVO, 1L);
 
             return Result.ok(token);
         }
@@ -112,41 +101,37 @@ public class LoginController {
 
     /**
      * @Description: 登出操作
-     * @Author: za-yubohan
+     * @Author: Altria-LS
      **/
-    public Result<?> loginOut(HttpServletRequest httpRequest) {
-        String token = httpRequest.getHeader(TokenContants.JWT_TOKEN_KEY);
-        JwtUserVO userVO = jwtUtil.parseToken();
+    @GetMapping("/logout")
+    public Result<?> loginOut() {
+        JwtUserVO userVO = null;
+        try {
+            userVO = jwtUtil.parseToken();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
         redisUtil.delete(TokenContants.JWT_ID + userVO.getAccountId());
-        return Result.ok();
+        return Result.ok(PlatformCodeEnum.SUCCESS);
     }
 
 
     /**
      * @Description: 从redis中获取密码校验失败次数, 判断是否需要图片验证码
-     * @Author: za-yubohan
+     * @Author: Altria-LS
      **/
     boolean pwdPicIsNeed(String key) {
-        try {
             //获取当前用户获取密码失败次数
-            String erroeCount = redisUtil.get(key);
-            if (StrUtil.isBlank(erroeCount)) {
+            String errorCount = redisUtil.get(key);
+            if (StrUtil.isBlank(errorCount)) {
                 return false;
             }
-            if (Integer.parseInt(erroeCount) >= TokenContants.PWD_PIC_LOCKED_COUNT_DEFAULT) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            log.warn("从redis中获取密码校验失败次数异常 e = {}", e);
-        }
-        return true;
+        return Integer.parseInt(errorCount) >= TokenContants.PWD_PIC_LOCKED_COUNT_DEFAULT;
     }
 
     /**
      * @Description: 校验用户是否需要冻结，如果需要冻结， 则冻结用户5分钟
-     * @Author: za-yubohan
+     * @Author: Altria-LS
      **/
     private Result<?> validateAndFreezeUser(String freezeKey, String userName) {
         //判断用户冻结是否超过5分钟的redis key
@@ -164,7 +149,7 @@ public class LoginController {
 
     /**
      * @Description: 从redis中获取密码校验失败次数, 判断是否需要冻结用户
-     * @Author: za-yubohan
+     * @Author: Altria-LS
      **/
     private boolean isNeedFreeze(String key) {
         try {
@@ -189,7 +174,7 @@ public class LoginController {
 
     /**
      * @Description: 从redis中重置密码校验失败次数
-     * @Author: za-yubohan
+     * @Author: Altria-LS
      **/
     private void restPwdErrorCount(String picErrorKey, String freezeKey) {
         try {

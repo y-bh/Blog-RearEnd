@@ -68,7 +68,7 @@ public class JwtUtil {
      * @description: 根据token获取用户信息
      * @author: Altria-LS
      **/
-    public JwtUserVO parseToken() {
+    public JwtUserVO parseToken() throws Exception {
         //获取request请求
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder
                 .getRequestAttributes();
@@ -76,24 +76,24 @@ public class JwtUtil {
         HttpServletRequest request = servletRequestAttributes.getRequest();
         //从Header获取token，没有则从cookies获取
         String authorization = request.getHeader("token");
-        if (StrUtil.isEmpty(authorization)) {
-            Cookie[] cookies = request.getCookies();
-            if (null != cookies) {
-                for (Cookie cookie : cookies) {
-                    if (StrUtil.equals("token", cookie.getName())) {
-                        try {
-                            authorization = URLDecoder.decode(cookie.getValue(), "UTF-8");
-                        } catch (UnsupportedEncodingException e) {
-                            log.error("cookie中不存在token:{}", e.getMessage());
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+//        if (StrUtil.isEmpty(authorization)) {
+//            Cookie[] cookies = request.getCookies();
+//            if (null != cookies) {
+//                for (Cookie cookie : cookies) {
+//                    if (StrUtil.equals("token", cookie.getName())) {
+//                        try {
+//                            authorization = URLDecoder.decode(cookie.getValue(), "UTF-8");
+//                        } catch (UnsupportedEncodingException e) {
+//                            log.error("cookie中不存在token:{}", e.getMessage());
+//                        }
+//                        break;
+//                    }
+//                }
+//            }
+//        }
         if (StrUtil.isBlank(authorization)) {
             log.error("token未携带");
-            return null;
+            throw new Exception("诶tnnd，token没找到");
         } else {
             return (JwtUserVO) redisUtil.getValue(authorization, JwtUserVO.class);
         }
