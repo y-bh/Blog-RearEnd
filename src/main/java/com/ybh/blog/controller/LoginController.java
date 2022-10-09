@@ -1,9 +1,10 @@
 package com.ybh.blog.controller;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.ybh.blog.Enum.PlatformCodeEnum;
-import com.ybh.blog.VO.JwtUserVO;
 import com.ybh.blog.VO.Result;
+import com.ybh.blog.VO.UserVO;
 import com.ybh.blog.contants.TokenContants;
 import com.ybh.blog.service.UserService;
 import com.ybh.blog.utils.JwtUtil;
@@ -34,25 +35,21 @@ public class LoginController {
      * @author: Altria-LS
      **/
     @PostMapping("/register")
-    public Result<String> register(@RequestBody JwtUserVO jwtUserVO) {
-        String token = null;
-        JwtUserVO userInfo = userService.getUserInfo(jwtUserVO);
-        if (userInfo!=null){
-            return Result.error("账号已存在");
+    public Result<String> register(@RequestBody UserVO jwtUserVO) {
+        //查询数据库中是否有该账户
+        UserVO userInfo = userService.getUserInfo(jwtUserVO);
+        if (userInfo != null) {
+            return Result.error(PlatformCodeEnum.ALREADY_EXIST);
         }
-        Boolean flag = userService.saveUserInfo(jwtUserVO);
-        if (flag) {
-            try {
-                //2.根据用户信息生成token
-                token = jwtUtil.generalToken(jwtUserVO);
-            } catch (Exception e) {
-                return Result.error(e.getMessage());
-            }
-            //3.将token存入redis中
-            redisUtil.setValue(TokenContants.JWT_ID + jwtUserVO.getAccountId(), token, 1L);
-            return Result.ok("注册成功", token);
-        } else {
-            return Result.error("寄，注册失败");
+        //保存对象
+        userService.saveUserInfo(jwtUserVO);
+        //从redis中获取token
+        String token = redisUtil.get(TokenContants.JWT_ID + jwtUserVO.getAccountId());
+        System.out.println(token);
+        if (token!=null){
+            return Result.ok(token);
+        }else {
+            return Result.error(PlatformCodeEnum.SAVE_ERROR);
         }
     }
 
@@ -61,12 +58,12 @@ public class LoginController {
      * @author: Altria-LS
      **/
     @PostMapping("/login")
-    public Result<?> login(@RequestBody JwtUserVO jwtUserVO) {
+    public Result<?> login(@RequestBody UserVO jwtUserVO) {
         // 判断输错次数是否到达需要验证码的次数
         String picErrorKey = TokenContants.LOGIN_PWD_ERROR_KEY + jwtUserVO.getAccountId();
         if (pwdPicIsNeed(picErrorKey)) {
             log.warn("用户登录失败，安全验证！");
-            return Result.error(TokenContants.LOGIN_CAPTCHA_IS_NULL, "安全验证");
+            return Result.error(PlatformCodeEnum.VERIFY_NULL);
         }
         //判断是否冻结用户，超过5次冻结用户
         String freezeKey = TokenContants.JWT_FREEZE_COUT + jwtUserVO.getAccountId();
@@ -75,7 +72,7 @@ public class LoginController {
         if (result != null) {
             return result;
         }
-        JwtUserVO userVO = userService.verifyUserInfo(jwtUserVO.getAccountId(), jwtUserVO.getPassword());
+        UserVO userVO = userService.verifyUserInfo(jwtUserVO.getAccountId(), jwtUserVO.getPassword());
         if (StrUtil.isEmpty(userVO.getAccountId())) {
             //错误次数记录+1
             restPwdErrorCount(picErrorKey, freezeKey);
@@ -91,10 +88,10 @@ public class LoginController {
             redisUtil.delete(freezeKey);
             redisUtil.delete(picErrorKey);
             //保存token到redis
-            redisUtil.set(TokenContants.JWT_ID + jwtUserVO.getAccountId(), token);
-            redisUtil.setValue(TokenContants.JWT_LOGIN_USER_INFO + jwtUserVO.getAccountId(), userVO, 1L);
+            redisUtil.set(TokenContants.JWT_ID + jwtUserVO.getAccountId(), token,1L);
+            redisUtil.set(TokenContants.JWT_LOGIN_USER_INFO + jwtUserVO.getAccountId(), JSONObject.toJSONString(userVO), 1L);
 
-            return Result.ok(token);
+            return Result.ok(PlatformCodeEnum.SUCCESS.getValue(),token);
         }
 
     }
@@ -105,13 +102,12 @@ public class LoginController {
      **/
     @GetMapping("/logout")
     public Result<?> loginOut() {
-        JwtUserVO userVO = null;
         try {
-            userVO = jwtUtil.parseToken();
+            UserVO userVO = jwtUtil.parseToken();
+            redisUtil.delete(TokenContants.JWT_ID + userVO.getAccountId());
         } catch (Exception e) {
             return Result.error(e.getMessage());
         }
-        redisUtil.delete(TokenContants.JWT_ID + userVO.getAccountId());
         return Result.ok(PlatformCodeEnum.SUCCESS);
     }
 
@@ -121,11 +117,11 @@ public class LoginController {
      * @Author: Altria-LS
      **/
     boolean pwdPicIsNeed(String key) {
-            //获取当前用户获取密码失败次数
-            String errorCount = redisUtil.get(key);
-            if (StrUtil.isBlank(errorCount)) {
-                return false;
-            }
+        //获取当前用户获取密码失败次数
+        String errorCount = redisUtil.get(key);
+        if (StrUtil.isBlank(errorCount)) {
+            return false;
+        }
         return Integer.parseInt(errorCount) >= TokenContants.PWD_PIC_LOCKED_COUNT_DEFAULT;
     }
 

@@ -38,7 +38,7 @@ public class ArticleDO implements Serializable {
     private Long tagsId;
 
     @ApiModelProperty("文章内容")
-    private Long body;
+    private String body;
 
     @ApiModelProperty("用户账号")
     private String accountId;

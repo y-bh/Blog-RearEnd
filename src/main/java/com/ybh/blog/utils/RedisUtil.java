@@ -48,22 +48,21 @@ public class RedisUtil {
      * @author: Altria-LS
      **/
     public String get(String key) {
-        Object result = this.redisTemplate.opsForValue().get(key);
+//        Object result = this.redisTemplate.opsForValue().get(key);
+//        if (result == null) {
+//            return null;
+//        } else {
+//            System.out.println(result);
+//            return result instanceof String ? String.valueOf(result) : JSON.toJSONString(result);
+//        }
+        Object result = redisTemplate.opsForValue().get(key);
         if (result == null) {
             return null;
-        } else {
-            return result instanceof String ? (String) this.redisTemplate.opsForValue().get(key) : JSON.toJSONString(result);
         }
-    }
-
-
-    /**
-     * @description: 将值放入缓存--泛型
-     * @author: Altria-LS
-     **/
-    public <T> void setValue(String key, T value, long liveTimes) {
-        String saveObjectString = JSON.toJSONString(value);
-        redisTemplate.opsForValue().set(key, saveObjectString, liveTimes, TimeUnit.DAYS);
+        if (result instanceof String) {
+            return (String) redisTemplate.opsForValue().get(key);
+        }
+        return JSON.toJSONString(result);
     }
 
     /**

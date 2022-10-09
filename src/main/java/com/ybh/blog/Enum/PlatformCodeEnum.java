@@ -4,22 +4,22 @@ package com.ybh.blog.Enum;
  * @author: Altria-LS
  **/
 public enum PlatformCodeEnum {
-    SUCCESS("10000", "成功响应"),
-    SC_UNAUTHORIZED("401", "没有认证"),
-    SC_FORBIDDEN("403", "没有权限"),
+    SUCCESS("200", "成功响应"),
+    SC_UNAUTHORIZED("401", "用户未登录，请登录后操作"),
+    SC_FORBIDDEN("403", "token已过期,请重新登录"),
 
-    SYSTEM_ERROR("90000", "系统错误"),
-    PARAM_IS_INVALID("90001", "非法参数"),
-    LOCK_TIMEOUT("90002", "锁定超时"),
-    LOCK_FAILED("90003", "锁定失败"),
-    DUPLICATION_MANIPULATION("90004", "重复操作"),
-    RESULT_IS_NULL("90005", "结果为空"),
-    SAVE_ERROR("90006", "保存失败"),
-    DELETE_ERROR("90007", "删除失败"),
-    PARAM_IS_NULL("90008", "参数为空"),
-    RECORD_IS_NULL("90009", "暂无记录"),
-    PASSWORD_EXPIRY("90010", "密码超过180天未更新！，请点击忘记密码修改"),
-    METHOD_UN_IMPLEMENT("90011", "方法未实现"),
+    SYSTEM_ERROR("500", "系统错误"),
+    PARAM_IS_INVALID("501", "非法参数"),
+    LOCK_TIMEOUT("502", "锁定超时"),
+    LOCK_FAILED("503", "锁定失败"),
+    ALREADY_EXIST("504", "信息已存在"),
+    RESULT_IS_NULL("505", "结果为空"),
+    SAVE_ERROR("506", "保存失败"),
+    DELETE_ERROR("507", "删除失败"),
+    PARAM_IS_NULL("508", "参数为空"),
+    RECORD_IS_NULL("509", "暂无记录"),
+    REDIS_ERROR("510","寄，redis出问题了"),
+    VERIFY_NULL("511","验证码为空");
 
     ;
 

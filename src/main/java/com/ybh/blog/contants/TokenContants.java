@@ -14,7 +14,6 @@ public class TokenContants {
     public static final String JWT_FREEZE_COUT = "JWT_FREEZE_COUT_";
     public static final String LOGIN_PWD_ERROR_KEY = "LOGIN_PWD_ERROR_KEY_";
     public static Integer PWD_PIC_LOCKED_COUNT_DEFAULT = 5;
-    public static final String LOGIN_CAPTCHA_IS_NULL = "10013";
     public static final String LOGIN_USER_FREEZE_TIMEOUT_KEY = "LOGIN_USER_FREEZE_TIMEOUT_KEY_";
     public static Integer PWD_FREEZE_USER_SECONDS = 5 * 60;
     public static final Integer PWD_FREEZE_USER_COUNT_DEFAULT = 5;

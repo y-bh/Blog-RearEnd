@@ -3,13 +3,13 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/blog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://124.222.129.50:3306/blog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     port: 6379
-    host: localhost
+    host: 124.222.129.50
     #    password:
     database: 0
     jedis:
@@ -17,9 +17,19 @@ spring:
         max-idle: 8
         max-active: 16
         min-idle: 4
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
 mybatis-plus:
   #指定xml映射文件位置，多个时逗号分隔
   mapper-locations: classpath:mapper/**.xml
+  global-config:
+    banner: false
+    enable-sql-runner: true
+    db-config:
+      id-type: assign_id   #当前id为assign_id类型的id（雪花算法生成的id）
+      logic-delete-value: Y   #默认1为删除
+      logic-not-delete-value: N   #默认0为未删除
 logging:
   level:
     com.ybh.blog.mapper: debug

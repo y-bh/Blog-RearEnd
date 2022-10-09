@@ -1,11 +1,6 @@
 package com.ybh.blog.service;
 
-import com.sun.org.apache.xalan.internal.xsltc.trax.DOM2TO;
-import com.ybh.blog.DO.UserDO;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.ybh.blog.DTO.UserDTO;
-import com.ybh.blog.VO.JwtUserVO;
-import com.ybh.blog.VO.Result;
+import com.ybh.blog.VO.UserVO;
 
 /**
  * <p>
@@ -20,19 +15,19 @@ public interface UserService {
      * @description: 查询用户信息
      * @author: Altria-LS
      **/
-    JwtUserVO getUserInfo(JwtUserVO jwtUserVO);
+    UserVO getUserInfo(UserVO userVO);
 
     /**
      * @return
      * @description: 保存用户信息
      * @author: Altria-LS
      */
-    Boolean saveUserInfo(JwtUserVO jwtUserVO);
+    void saveUserInfo(UserVO jwtUserVO);
 
     /**
      * @description: 验证用户信息
      * @author: Altria-LS
      **/
-    JwtUserVO verifyUserInfo(String accountId,String password);
+    UserVO verifyUserInfo(String accountId,String password);
 
 }

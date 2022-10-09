@@ -1,12 +1,17 @@
 package com.ybh.blog.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.ybh.blog.DTO.UserDTO;
-import com.ybh.blog.VO.JwtUserVO;
+import com.ybh.blog.Enum.PlatformCodeEnum;
+import com.ybh.blog.VO.UserVO;
+import com.ybh.blog.contants.TokenContants;
+import com.ybh.blog.convert.UserConvertMapper;
+import com.ybh.blog.exception.BaseException;
 import com.ybh.blog.manager.UserManager;
 import com.ybh.blog.service.UserService;
-import org.springframework.beans.BeanUtils;
+import com.ybh.blog.utils.JwtUtil;
+import com.ybh.blog.utils.RedisUtil;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 
 /**
@@ -21,31 +26,40 @@ import javax.annotation.Resource;
 public class UserServiceImpl implements UserService {
     @Resource
     UserManager userManager;
+    @Resource
+    JwtUtil jwtUtil;
+    @Resource
+    RedisUtil redisUtil;
 
     @Override
-    public JwtUserVO getUserInfo(JwtUserVO jwtUserVO) {
-        UserDTO userDTO = new UserDTO();
-        BeanUtil.copyProperties(jwtUserVO, userDTO);
+    public UserVO getUserInfo(UserVO userVO) {
+        UserDTO userDTO = UserConvertMapper.INSTANCE.userVOtoUserDTO(userVO);
         UserDTO user = userManager.getUserByAccountId(userDTO);
         if (user==null){
             return null;
         }
-        BeanUtils.copyProperties(userDTO,jwtUserVO);
-        return jwtUserVO;
+        UserVO result = UserConvertMapper.INSTANCE.userDTOtoUserVO(user);
+        return result;
     }
 
     @Override
-    public Boolean saveUserInfo(JwtUserVO jwtUserVO){
-        UserDTO userDTO = new UserDTO();
-        BeanUtil.copyProperties(jwtUserVO, userDTO);
-        return userManager.saveUserInfo(userDTO);
+    public void saveUserInfo(UserVO userVO){
+        UserDTO userDTO = UserConvertMapper.INSTANCE.userVOtoUserDTO(userVO);
+        Boolean flag = userManager.saveUserInfo(userDTO);
+        if (flag) {
+            //根据用户信息生成token
+            String token = jwtUtil.generalToken(userVO);
+            //将token存入redis中
+            redisUtil.set(TokenContants.JWT_ID + userVO.getAccountId(), token, 1L);
+        } else {
+            throw new BaseException(PlatformCodeEnum.SAVE_ERROR.getValue());
+        }
+
     }
 
     @Override
-    public JwtUserVO verifyUserInfo(String accountId,String password) {
-        JwtUserVO userVO = new JwtUserVO();
+    public UserVO verifyUserInfo(String accountId,String password) {
         UserDTO userDTO = userManager.verifyUserInfo(accountId, password);
-        BeanUtil.copyProperties(userDTO,userVO);
-        return userVO;
+        return UserConvertMapper.INSTANCE.userDTOtoUserVO(userDTO);
     }
 }

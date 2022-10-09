@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = NullPointerException.class)
     public Result<String> exceptionHandler(NullPointerException e) {
         log.error("发生空指针异常！ msg: -> ", e);
-        return Result.error("发生空指针异常!");
+        return Result.error("有参数传递为空!");
     }
 
     /**
